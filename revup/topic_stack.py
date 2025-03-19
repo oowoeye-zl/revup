@@ -1142,6 +1142,7 @@ class TopicStack:
     def populate_update_info(
         self,
         update_pr_body_arg: bool,
+        pr_body_template: Optional[str] = None,
     ) -> None:
         """
         Populate information necessary to do PR creation / update in github.
@@ -1151,9 +1152,19 @@ class TopicStack:
         if self.names_to_ids is None or self.names_to_logins is None or self.labels_to_ids is None:
             raise RuntimeError("Need to query before updating")
 
+
         for topic in self.topics.values():
             commit_msg_lines = topic.original_commits[0].commit_msg.split("\n")
-            body = "\n".join(commit_msg_lines[1:]).strip()
+            # If a PR body template is provided, simply use it for the PR body.
+            # Otherwise, use the non-title lines of the first commit as the PR body.
+            body = (
+                "\n".join(commit_msg_lines[1:]).strip()
+                if pr_body_template is None
+                else pr_body_template.format(
+                    body="\n".join(commit_msg_lines[1:]).strip(),
+                    title=commit_msg_lines[0],
+                )
+            )
             title = commit_msg_lines[0]
             for branch, review in topic.reviews.items():
                 if review.status == PrStatus.NEW:

@@ -223,6 +223,7 @@ async def main() -> int:
     upload_parser.add_argument("--push-only", action="store_true")
     upload_parser.add_argument("--status", "-t", action="store_true")
     upload_parser.add_argument("--update-pr-body", action="store_true", default=True)
+    upload_parser.add_argument("--pr-body-template-file")
     upload_parser.add_argument("--create-local-branches", action="store_true")
     upload_parser.add_argument("--review-graph", action="store_true", default=True)
     upload_parser.add_argument("--trim-tags", action="store_true")

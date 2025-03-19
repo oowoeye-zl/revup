@@ -1,4 +1,5 @@
 import argparse
+import os
 import subprocess
 from typing import Optional
 
@@ -68,9 +69,19 @@ async def main(
     if args.dry_run:
         topics.print(not args.verbose)
         return 0
+    # If the user has provided a pr_body_template file, try to read it into a string.
+    pr_body_template = None
+    if args.pr_body_template_file:
+        try:
+            with open(os.path.expanduser(args.pr_body_template_file), "r") as f:
+                pr_body_template = f.read()
+        except FileNotFoundError:
+            raise RevupUsageException(
+                f"PR body template file not found: {args.pr_body_template_file}"
+            )
 
     if not args.push_only:
-        topics.populate_update_info(args.update_pr_body)
+        topics.populate_update_info(args.update_pr_body, pr_body_template)
     if not args.skip_confirm and topics.num_reviews_changed() > 0:
         topics.print(not args.verbose)
         if git_ctx.sh.wait_for_confirmation():
